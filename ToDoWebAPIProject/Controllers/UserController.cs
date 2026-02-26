@@ -50,7 +50,7 @@ namespace ToDoWebAPIProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserByID(int id)
         {
-            var user =  await _userContext.users.FindAsync(id);
+            var user = await _userContext.users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -58,6 +58,21 @@ namespace ToDoWebAPIProject.Controllers
             return Ok(user);
 
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<User>> UserDelete(int id)
+        {
+            var user = await _userContext.users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            _userContext.users.Remove(user);
+            await _userContext.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
 
     }
 }
