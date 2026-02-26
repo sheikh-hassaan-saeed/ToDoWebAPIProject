@@ -33,7 +33,7 @@ namespace ToDoWebAPIProject.Controllers
         {
             _userContext.users.Add(user);
             await _userContext.SaveChangesAsync();
-            return Ok(User);
+            return Ok(user);
         }
 
 
