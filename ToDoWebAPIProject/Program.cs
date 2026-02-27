@@ -1,7 +1,20 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using ToDoWebAPIProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(Options =>
+{
+
+    Options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+    });
+
+});
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserContext>(options =>
@@ -21,6 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
+app.UseCors("AllowReactApp");
 
 app.UseHttpsRedirection();
 
