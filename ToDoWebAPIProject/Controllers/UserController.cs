@@ -17,7 +17,6 @@ namespace ToDoWebAPIProject.Controllers
         }
 
         [HttpGet]
-        [Route("GetAllUsers")]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUser()
         {
             var users = await _userContext.users.ToListAsync();
