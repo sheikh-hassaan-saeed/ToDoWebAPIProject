@@ -17,8 +17,43 @@ namespace ToDoWebAPIProject.Controllers
             _userContext = userContext;
         }
 
+        [HttpGet("test-filter-speed")]
+        public async Task<ActionResult> TestFilterSpeed()
+        {
+            // Warm-up EF Core
+            await _userContext.users.FirstOrDefaultAsync();
+
+            // Unfiltered query
+            var stopwatch = Stopwatch.StartNew();
+            var allUsers = await _userContext.users.ToListAsync();
+            stopwatch.Stop();
+            var unfilteredTime = stopwatch.ElapsedMilliseconds;
+            Console.WriteLine($"Unfiltered: {allUsers.Count} rows, Time: {unfilteredTime} ms");
+
+            // Filtered query
+            stopwatch.Restart();
+            var filteredUsers = await _userContext.users
+                .Where(u => u.Title == "Coding")
+                .ToListAsync();
+            stopwatch.Stop();
+            var filteredTime = stopwatch.ElapsedMilliseconds;
+            Console.WriteLine($"Filtered: {filteredUsers.Count} rows, Time: {filteredTime} ms");
+
+            // Calculate difference
+            var diff = unfilteredTime - filteredTime;
+            var reductionPercent = (double)diff / unfilteredTime * 100;
+
+            return Ok(new
+            {
+                Unfiltered = new { Count = allUsers.Count, TimeMs = unfilteredTime },
+                Filtered = new { Count = filteredUsers.Count, TimeMs = filteredTime },
+                DifferenceMs = diff,
+                ReductionPercent = reductionPercent
+            });
+        }
+
         [HttpPost("GenerateDummyTodos")]
-        public async Task<ActionResult> GenerateDummyTodos(int count = 1000)
+        public async Task<ActionResult> GenerateDummyTodos(int count = 10000)
         {
             var random = new Random();
             var titles = new[] { "Coding", "Cooking", "Playing", "Study" }; 
