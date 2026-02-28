@@ -14,6 +14,5 @@ namespace ToDoWebAPIProject.Models
         public DbSet<User> users { get; set; }
     }
 
-
 }
 

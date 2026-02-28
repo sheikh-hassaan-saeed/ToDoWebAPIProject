@@ -3,13 +3,13 @@ using ToDoWebAPIProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>  // ✅ Changed 'Options' to 'options' (convention, but works either way)
+builder.Services.AddCors(options =>  
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();  // ✅ Added missing semicolon here!
+              .AllowAnyMethod();  
     });
 });
 
@@ -22,7 +22,6 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -30,7 +29,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseCors("AllowReactApp");  // ✅ This is in the right place!
+app.UseCors("AllowReactApp");  
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

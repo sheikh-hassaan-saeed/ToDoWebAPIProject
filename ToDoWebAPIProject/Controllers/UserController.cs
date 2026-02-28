@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using ToDoWebAPIProject.Models;
 
 namespace ToDoWebAPIProject.Controllers
@@ -16,16 +17,67 @@ namespace ToDoWebAPIProject.Controllers
             _userContext = userContext;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUser()
+        [HttpPost("GenerateDummyTodos")]
+        public async Task<ActionResult> GenerateDummyTodos(int count = 1000)
         {
-            var users = await _userContext.users.ToListAsync();
-            if (users.Count == 0)
+            var random = new Random();
+            var titles = new[] { "Coding", "Cooking", "Playing", "Study" }; 
+
+            for (int i = 1; i <= count; i++)
             {
-                return NotFound();
+                var user = new User
+                {
+                    Title = titles[random.Next(titles.Length)],
+                    Description = $"This is description {i}",
+                    DueDate = DateTime.Now.AddMinutes(random.Next(0, 1440)) 
+                };
+
+                _userContext.users.Add(user);
+
+                // Save every 100 users
+                if (i % 100 == 0)
+                    await _userContext.SaveChangesAsync();
             }
+
+            await _userContext.SaveChangesAsync();
+
+            return Ok($"{count} dummy todos added!");
+        }
+
+
+        [HttpGet("filtered")]
+        public async Task<ActionResult<IEnumerable<User>>> GetFilteredUsers(
+            int? Id = null,
+            string? Title = null
+            )
+
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            var query = _userContext.users.AsQueryable();
+
+            if (Id.HasValue)
+            {
+                query = query.Where(u => u.ID == Id.Value);
+            }
+
+            if (!string.IsNullOrEmpty(Title))
+            {
+                query = query.Where(u => u.Title == Title);
+            }
+
+            var users = await query.ToListAsync();
+
+            stopwatch.Stop();
+
+            Console.WriteLine($"Time Taken: {stopwatch.ElapsedMilliseconds} ms");
+
+
             return Ok(users);
         }
+
+
+
         [HttpPost]
         [Route("AddUser")]
         public async Task<ActionResult<User>> AddUser(User user)
